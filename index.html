@@ -92,8 +92,7 @@
     });
   }
 
-  
-function showResult(res) {
+  function showResult(res) {
     if (!res) {
       showCard('error', '❌ 回傳資料異常', '', '', '後端未回傳有效資料，請檢查程式碼.gs。');
       playBeep('error');
@@ -132,6 +131,9 @@ function showResult(res) {
       showCard('error', res.message, '', '', '');
       playBeep('error');
     }
+
+    // 清空手動輸入框，方便下一位輸入
+    document.getElementById('manualCode').value = '';
   }
 
   function showCard(type, title, name, regId, details) {
@@ -153,12 +155,16 @@ function showResult(res) {
     if (e.key === 'Enter') submitManual();
   });
 
-  // 頁面載入後自動啟動動態鏡頭
+  // 頁面載入後自動啟動動態鏡頭（已套用加速優化）
   window.onload = function() {
     html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
-      fps: 10, 
-      qrbox: { width: 220, height: 220 },
-      rememberLastUsedCamera: true
+      fps: 20, // 提高每秒偵測幀率，反應更靈敏
+      qrbox: { width: 240, height: 240 }, // 稍微加大掃描框，更容易對準
+      rememberLastUsedCamera: true,
+      // 限定只辨識 QR Code，省去掃描其他一維條碼的運算時間
+      formatsToSupport: typeof Html5QrcodeSupportedFormats !== 'undefined' 
+        ? [ Html5QrcodeSupportedFormats.QR_CODE ] 
+        : undefined
     });
     html5QrcodeScanner.render((decodedText) => {
       verifyCode(decodedText);
